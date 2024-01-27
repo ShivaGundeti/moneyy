@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-top: 10px;
+        }
+
+        input, button {
+            margin-bottom: 10px;
+            padding: 8px;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .remove-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .remove-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Money Tracker</h1>
+        <form id="expenseForm">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" required>
+
+            <label for="date">Date:</label>
+            <input type="date" id="date" required>
+
+            <label for="description">Description:</label>
+            <input type="text" id="description" required>
+
+            <button type="button" onclick="addExpense()">Add Expense</button>
+        </form>
+
+        <div id="expensesTable">
+            <!-- Expenses table will be displayed here -->
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.7.20/c3.min.js"></script>
+    <script>
+        // Sample data to load initially
+        let expenses = [
+            { amount: 50, date: '2024-01-27', description: 'Groceries' },
+            { amount: 30, date: '2024-01-26', description: 'Dinner' }
+        ];
+
+        // Function to render the table
+        function renderTable() {
+            const tableContainer = document.getElementById('expensesTable');
+            tableContainer.innerHTML = '';
+
+            if (expenses.length === 0) {
+                tableContainer.innerHTML = '<p>No expenses yet.</p>';
+                return;
+            }
+
+            const table = document.createElement('table');
+            const headerRow = table.insertRow(0);
+
+            // Create table headers
+            ['Amount', 'Date', 'Description', ''].forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+
+            // Create table rows
+            expenses.forEach((expense, index) => {
+                const row = table.insertRow(index + 1);
+                row.insertCell(0).textContent = expense.amount;
+                row.insertCell(1).textContent = expense.date;
+                row.insertCell(2).textContent = expense.description;
+
+                // Create remove button
+                const removeCell = row.insertCell(3);
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = 'Remove';
+                removeBtn.classList.add('remove-btn');
+                removeBtn.onclick = () => removeExpense(index);
+                removeCell.appendChild(removeBtn);
+            });
+
+            tableContainer.appendChild(table);
+        }
+
+        // Function to add an expense
+        function addExpense() {
+            const amount = parseFloat(document.getElementById('amount').value);
+            const date = document.getElementById('date').value;
+            const description = document.getElementById('description').value;
+
+            if (isNaN(amount) || amount <= 0 || !date || !description) {
+                alert('Please enter valid values.');
+                return;
+            }
+
+            const newExpense = { amount, date, description };
+            expenses.push(newExpense);
+            saveExpenses();
+            renderTable();
+        }
+
+        // Function to remove an expense
+        function removeExpense(index) {
+            expenses.splice(index, 1);
+            saveExpenses();
+            renderTable();
+        }
+
+        // Function to save expenses to localStorage
+        function saveExpenses() {
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+        }
+
+        // Function to load expenses from localStorage
+        function loadExpenses() {
+            const savedExpenses = localStorage.getItem('expenses');
+            expenses = savedExpenses ? JSON.parse(savedExpenses) : [];
+            renderTable();
+        }
+
+        // Initial setup
+        loadExpenses();
+    </script>
+</body>
+</html>
